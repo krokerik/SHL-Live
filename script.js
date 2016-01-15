@@ -4,7 +4,7 @@
 
 // var token is defined in index.php
 
-var baseUrl = "http://krokerik.com/SHL/getStuff.php";
+var baseUrl = "http://krokerik.com/SHL/SHL_Proxy.php";
 var teams = Array();
 window.onload = function() {
     getStandings(2015);
