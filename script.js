@@ -6,7 +6,8 @@
 
 var baseUrl = "http://krokerik.com/SHL/SHL_Proxy.php";
 var teams = Array();
-window.onload = function() {
+var games = Array();
+window.onload = function () {
     getStandings(2015);
     getGames(2015);
 };
@@ -16,7 +17,7 @@ function updateList(standings) {
     var len = standings["length"];
     if (len > 0) {
         var liveTable = document.getElementById("liveTable");
-        while (liveTable.lastChild) 
+        while (liveTable.lastChild)
             liveTable.removeChild(liveTable.lastChild);
         for (var i = 0; i < len; i++) {
             var row = getRowFromStanding(standings[i]);
@@ -24,49 +25,50 @@ function updateList(standings) {
         }
     }
 }
-function updateGames(games) {
-    if (games.length > 0) {
+function updateGames(gamesArray) {
+    if (gamesArray.length > 0) {
         var clone = Array();
-        for(var i=0; i<teams.length; i++){
+        for (var i = 0; i < teams.length; i++) {
             clone.push(teams[i]["team_code"]);
         }
-        games.reverse();
+        gamesArray.reverse();
         var today = new Date(new Date().toDateString());
         var tmp = Array();
-        for (var i = 0; i < games.length; i++) {
-            var date = new Date(games[i]["start_date_time"]);
-            if(date.getTime()>today.getTime())
-                tmp.push(games[i]);
+        for (var i = 0; i < gamesArray.length; i++) {
+            var date = new Date(gamesArray[i]["start_date_time"]);
+            if (date.getTime() > today.getTime())
+                tmp.push(gamesArray[i]);
         }
-        games = tmp;
-        
-        for(var i=0; i<games.length; i++){
-            var home = clone.indexOf(games[i]["home_team_code"]);
-            var away = clone.indexOf(games[i]["away_team_code"]);
-            if(home===-1 && away===-1){
-                games.splice(i,1);
+        gamesArray = tmp;
+
+        for (var i = 0; i < gamesArray.length; i++) {
+            var home = clone.indexOf(gamesArray[i]["home_team_code"]);
+            var away = clone.indexOf(gamesArray[i]["away_team_code"]);
+            if (home === -1 && away === -1) {
+                gamesArray.splice(i, 1);
                 i--;
-            } else if(home===-1 && away>=0){
-                clone.splice(away,1);
-            } else if(home>=0 && away===-1){
-                clone.splice(home,1);
-            } else if(home>=0 && away>=0){
-                clone.splice(home,1);
-                away = clone.indexOf(games[i]["away_team_code"]);
-                clone.splice(away,1);
+            } else if (home === -1 && away >= 0) {
+                clone.splice(away, 1);
+            } else if (home >= 0 && away === -1) {
+                clone.splice(home, 1);
+            } else if (home >= 0 && away >= 0) {
+                clone.splice(home, 1);
+                away = clone.indexOf(gamesArray[i]["away_team_code"]);
+                clone.splice(away, 1);
             }
         }
-        console.log(games);
+        console.log(gamesArray);
         var gamesDiv = document.getElementById("games");
-        while(gamesDiv.lastChild)
+        while (gamesDiv.lastChild)
             gamesDiv.removeChild(gamesDiv.lastChild);
-        for (var i = 0; i < games.length; i++) {
-            var game = getGameFromJson(games[i]);
-            gamesDiv.appendChild(game);
+        games = Array();
+        for (var i = 0; i < gamesArray.length; i++) {
+            getGame(gamesArray[i]["season"], gamesArray[i]["game_id"]);
+
         }
     }
 }
-function getRowFromStanding(team){
+function getRowFromStanding(team) {
     var row = document.createElement("TR");
     var rank = document.createElement("TD");
     var name = document.createElement("TD");
@@ -74,7 +76,7 @@ function getRowFromStanding(team){
     var gd = document.createElement("TD");
     var points = document.createElement("TD");
     var trending = document.createElement("TD");
-    
+
     rank.innerHTML = team["rank"];
     name.innerHTML = team["team"]["code"];
     gp.innerHTML = team["gp"];
@@ -88,10 +90,10 @@ function getRowFromStanding(team){
     row.appendChild(gd);
     row.appendChild(points);
     row.appendChild(trending);
-    
+
     return row;
 }
-function getGameFromJson(game){
+function getGameFromJson(game) {
     var gameDiv = document.createElement("DIV");
     var dateSpan = document.createElement("SPAN");
     var home = document.createElement("SPAN");
@@ -101,14 +103,14 @@ function getGameFromJson(game){
 
     gameDiv.className = "game";
     home.className = "home";
-    home.innerHTML = getTeamByID(game["home_team_code"])["team"]["code"]+"<span class=\"result\">"+game["home_team_result"]+"</span>";
+    home.innerHTML = getTeamByID(game["home_team_code"])["team"]["code"] + "<span class=\"result\">" + game["home_team_result"] + "</span>";
     away.className = "away";
-    away.innerHTML = getTeamByID(game["away_team_code"])["team"]["code"]+"<span class=\"result\">"+game["away_team_result"]+"</span>";
+    away.innerHTML = getTeamByID(game["away_team_code"])["team"]["code"] + "<span class=\"result\">" + game["away_team_result"] + "</span>";
     dateSpan.className = "date";
-    dateSpan.innerHTML = date.toDateString().slice(0,date.toDateString().length-5);
+    dateSpan.innerHTML = date.toDateString().slice(0, date.toDateString().length - 5);
     time.className = "time";
-    time.innerHTML = date.getHours()+":"+('0'+date.getMinutes()).slice(-2);
-    
+    time.innerHTML = date.getHours() + ":" + ('0' + date.getMinutes()).slice(-2);
+
     gameDiv.appendChild(dateSpan);
     gameDiv.appendChild(home);
     gameDiv.appendChild(away);
@@ -120,17 +122,17 @@ function getStandings(year) {
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function () {
         if (xmlhttp.readyState === 4) {
-            var tmp=JSON.parse(xmlhttp.responseText);
+            var tmp = JSON.parse(xmlhttp.responseText);
             updateList(JSON.parse(xmlhttp.responseText));
             teams = Array();
-            for(var i=0;i<tmp.length;i++)
+            for (var i = 0; i < tmp.length; i++)
                 teams.push(tmp[i]);
         }
     };
     xmlhttp.open("GET", url, true);
     xmlhttp.send();
 }
-function getGames(year){
+function getGames(year) {
     var url = baseUrl + "?token=" + token + "&action=games&year=" + year;
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function () {
@@ -141,14 +143,31 @@ function getGames(year){
     xmlhttp.open("GET", url, true);
     xmlhttp.send();
 }
-function getTeams(){
+function getGame(year, gameID) {
+    var url = baseUrl + "?token=" + token + "&action=game&year=" + year + "&gameid=" + gameID;
+    console.log(url);
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.onreadystatechange = function () {
+        if (xmlhttp.readyState === 4) {
+            addGame(JSON.parse(xmlhttp.responseText));
+        }
+    };
+    xmlhttp.open("GET", url, true);
+    xmlhttp.send();
+}
+function addGame(game) {
+    games.push(game);
+    var gamesDiv = document.getElementById("games");
+    gamesDiv.appendChild(getGameFromJson(game));
+}
+function getTeams() {
     var url = baseUrl + "?token=" + token + "&action=teams";
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function () {
         if (xmlhttp.readyState === 4) {
             var tmp = JSON.parse(xmlhttp.responseText);
             teams = Array();
-            for (var i=0;i<tmp.length;i++){
+            for (var i = 0; i < tmp.length; i++) {
                 teams.push();
             }
         }
@@ -156,14 +175,14 @@ function getTeams(){
     xmlhttp.open("GET", url, true);
     xmlhttp.send();
 }
-function getTeam(teamID){
-    var url = baseUrl + "?token=" + token + "&action=team&team="+teamID;
+function getTeam(teamID) {
+    var url = baseUrl + "?token=" + token + "&action=team&team=" + teamID;
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function () {
         if (xmlhttp.readyState === 4) {
             var tmp = JSON.parse(xmlhttp.responseText);
             teams = Array();
-            for (var i=0;i<tmp.length;i++){
+            for (var i = 0; i < tmp.length; i++) {
                 teams.push(tmp[i]);
             }
         }
@@ -171,8 +190,8 @@ function getTeam(teamID){
     xmlhttp.open("GET", url, true);
     xmlhttp.send();
 }
-function getTeamByID(teamID){
-    for(var i=0; i<teams.length; i++)
-        if(teams[i]["team_code"] === teamID)
+function getTeamByID(teamID) {
+    for (var i = 0; i < teams.length; i++)
+        if (teams[i]["team_code"] === teamID)
             return teams[i];
 }
