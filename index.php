@@ -1,6 +1,6 @@
 <?php error_reporting(E_ALL);
 include 'connection.php'; 
-$title = "SHL Livetabell";
+$title = "SHL Live Table";
 $l = new Connection();
 $t = $l->getToken();
 ?>
@@ -8,7 +8,9 @@ $t = $l->getToken();
 <html lang="sv" dir="ltr">
 <head>
     <meta charset="UTF-8" />
-    <link href="style.css" rel="stylesheet">
+    <link href="mobile.css" rel="stylesheet" media="screen">
+    <link href="style.css" rel="stylesheet" media="only screen and (min-width: 768px) ">
+    <link href="print.css" rel="stylesheet" media="print">
     <script>
             var token = "<?=$t?>";
     </script>
@@ -33,6 +35,6 @@ $t = $l->getToken();
             </tbody>
         </table>
     </div>
-    <div id="games"></div>
+    <div id="games"><h3>Today's games:</h3></div>
 </body>
 </html>

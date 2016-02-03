@@ -1,0 +1,23 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : Feb 1, 2016, 12:14:58 AM
+    Author     : Erik Andersson
+*/
+
+table{
+    width:100%;
+    border-collapse: collapse;
+}
+#games {
+    display: none;
+}
+th {
+    text-align: left;
+}
+tbody>tr:nth-child(11),tbody>tr:nth-child(7),tbody>tr:nth-child(13){
+    border-top: 2px solid black;
+}

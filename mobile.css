@@ -4,17 +4,16 @@ To change this template file, choose Tools | Templates
 and open the template in the editor.
 */
 /* 
-    Created on : Jan 13, 2016, 12:39:53 PM
+    Created on : Feb 1, 2016, 11:43:32 AM
     Author     : Erik Andersson
 */
 body{
-    background-color: white;
-    display:flex;
+    background-color: #a8a8a8;
 }
 #games{
-    width: 8em;
+    margin-top: 10px;
+    width: 100%;
     border: 1px black solid;
-    float:right;
 }
 .game{
     padding:0.1em;
@@ -27,9 +26,6 @@ body{
     font: 2em "Courier New", Courier, monospace;
     width:100%;
 }
-#table{
-    flex:1;
-}
 .date,.time{
     text-align:center;
     display:block;
@@ -41,7 +37,7 @@ body{
 }
 table{
     border-collapse: collapse;
-    width:auto;
+    width:100%;
 }
 td,th{
     border: 1px solid black;
