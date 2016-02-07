@@ -22,6 +22,7 @@ function team(code, gp, gf, ga, p) {
         return this.gf - this.ga;
     };
 }
+
 var baseUrl = window.location.protocol + "//" + window.location.host + "/SHL/SHL_Proxy.php";
 var teams = Array();
 var games = Array();
@@ -34,6 +35,10 @@ window.onload = function () {
     setInterval(updateGamesDiv, 3000);
     setInterval(generateTable, 3000);
 };
+document.addEventListener('DOMContentLoaded', function () {
+  if (Notification.permission !== "granted")
+    Notification.requestPermission();
+});
 
 function updateGamesDiv() {
     var gamesDiv = document.getElementById("games");
@@ -45,8 +50,8 @@ function updateGamesDiv() {
         }
         gamesDiv.appendChild(noGamesHeader);
     } else {
-        var secondNode = gamesDiv.firstChild.nextSibling();
-        if(secondNode.tagName === "H4"){
+        var secondNode = gamesDiv.firstChild.nextSibling;
+        if(secondNode !== null && secondNode.tagName === "H4"){
             gamesDiv.removeChild(secondNode);
         }
         for (var i = 0; i < live.length; i++) {
@@ -59,9 +64,10 @@ function updateGames(gamesArray) {
 
     for (var i = 0; i < gamesArray.length; i++) {
         var date = new Date(gamesArray[i]["start_date_time"]);
-        if (gamesArray[i]["played"] === true)
+        var today = new Date(new Date().toDateString());
+        if (date.getTime() < today.getTime())
             played.push(gamesArray[i]);
-        if (date.toDateString() === new Date().toDateString()) {
+        else if (date.toDateString() === today.toDateString()) {
             getGame(2015, gamesArray[i]["game_id"]);
             live.push(gamesArray[i]);
         }
@@ -129,7 +135,7 @@ function generateTable() {
         }
         for (var i = 0; i < live.length; i++) {
             var date = new Date(live[i]["start_date_time"]);
-            if (live[i]["played"] !== true && date.getTime() < Date.now()) {
+            if (live[i]["live"] !== undefined) {
                 var home = live[i]["home_team_code"];
                 var away = live[i]["away_team_code"];
                 if (!teams.contains(home)) {
@@ -154,7 +160,7 @@ function generateTable() {
                 gf[home] += live[i]["live"]["home_score"];
                 ga[home] += live[i]["live"]["away_score"];
 
-                if (live[i]["overtime"] || live["penalty_shots"] || live["live"]["period"]>3) {
+                if (live[i]["overtime"] || live[i]["penalty_shots"] || live[i]["live"]["period"]>3) {
                     if (live[i]["live"]["home_score"] > live[i]["live"]["away_score"]) {
                         p[home] += 2;
                         p[away] += 1;
@@ -247,7 +253,7 @@ function startTimer(timeSpan, date) {
     var minutes = Math.floor(time / 60000);
     time -= minutes * 60000;
     var seconds = Math.floor(time / 1000);
-    timeSpan.innerHTML = hours + ":" + minutes + ":" + seconds;
+    timeSpan.innerHTML = ('0' + hours).slice(-2) + ":" + ('0'+minutes).slice(-2) + ":" + ('0'+seconds).slice(-2);
     if (date.getTime() > now) {
         setTimeout(function () {
             startTimer(timeSpan, date);
@@ -316,8 +322,6 @@ function getGame(year, gameID) {
                 setTimeout(function () {
                     getGame(year, gameID);
                 }, delay);
-            } else {
-                played.push(game);
             }
         }
     };
@@ -365,11 +369,39 @@ function getTeam(teamID) {
 }
 function updateLiveGame(game) {
     for (var i = 0; i < live.length; i++)
-        if (live[i]["game_id"] === game["game_id"])
+        if (live[i]["game_id"] === game["game_id"]){
+            var oldHome = live[i]["live"]!==undefined ? live[i]["live"]["home_score"] : live[i]["home_team_result"];
+            var oldAway = live[i]["live"]!==undefined ? live[i]["live"]["away_score"] : live[i]["away_team_result"];
+            var currHome = game["live"]!==undefined ? game["live"]["home_score"] : game["home_team_result"];
+            var currAway = game["live"]!==undefined ? game["live"]["away_score"] : game["away_team_result"];
+            var scoreLine = game["home_team_code"]+" "+currHome+" - "+currAway+" "+game["away_team_code"];
+            if(oldHome!==currHome)
+                notifyGoal(game["home_team_code"],scoreLine);
+            if(oldAway!==currAway)
+                notifyGoal(game["away_team_code"],scoreLine);
             live[i] = game;
+        }
 }
 function getTeamByID(teamID) {
     for (var i = 0; i < teams.length; i++)
         if (teams[i]["team_code"] === teamID)
             return teams[i];
+}
+function notifyGoal(team,result) {
+  if (!Notification) {
+    return;
+  }
+
+  if (Notification.permission !== "granted")
+    Notification.requestPermission();
+  else {
+    var notification = new Notification(team+' scored!', {
+      icon: 'http://cdn2.shl.se/files/SHL/PressMedia/SHL_Logotype_black_144dpi.jpg',
+      body: "Current result is "+result+"!",
+    });
+
+    notification.onclick = function () {
+      window.focus();      
+    };
+  }
 }
