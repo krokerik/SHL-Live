@@ -2,7 +2,10 @@
  * Gets data from the SHL API, interprets it and updates the website DOM-tree 
  */
 
-// var token is defined in index.php
+
+/* global token, Notification */
+
+// var token is defined in index.php, Notification is used by various browsers to send notifications.
 Array.prototype.contains = function (obj) {
     var i = this.length;
     while (i--) {
@@ -192,7 +195,7 @@ function generateTable() {
         while (liveTable.hasChildNodes())
             liveTable.removeChild(liveTable.firstChild);
         for (var i = 0; i < sorted.length; i++) {
-            var row = getRowFromArray(sorted[i].name, sorted[i].gp, sorted[i].gd(), sorted[i].p, i + 1, rank[sorted[i].name] - (i + 1));
+            var row = getRowFromArray(sorted[i], i + 1, rank[sorted[i].name] - (i + 1));
             liveTable.appendChild(row);
         }
     }
@@ -213,7 +216,7 @@ function sortTable(teamArray) {
     } while (swapped);
     return sorted;
 }
-function getRowFromArray(team, gp, gd, p, rank, trend) {
+function getRowFromArray(team, rank, trend) {
     var row = document.createElement("TR");
     var rankCell = document.createElement("TD");
     var name = document.createElement("TD");
@@ -222,13 +225,16 @@ function getRowFromArray(team, gp, gd, p, rank, trend) {
     var points = document.createElement("TD");
     var trending = document.createElement("TD");
     var image = document.createElement("IMG");
+    var gdAbbr = document.createElement("ABBR");
     
-    rankCell.innerHTML = rank;
-    name.innerHTML = team;
-    gpCell.innerHTML = gp;
-    gdCell.innerHTML = gd;
-    points.innerHTML = p;
-    trending.innerHTML = trend;
+    rankCell.textContent = rank;
+    name.textContent = team.name;
+    gpCell.textContent = team.gp;
+    gdAbbr.textContent = team.gd();
+    gdAbbr.title = team.gf+" - "+team.ga;
+    gdCell.appendChild(gdAbbr);
+    points.textContent = team.p;
+    trending.textContent = trend;
     if(trend>0)
         image.src = "uparrow.png";
     else if(trend<0)
