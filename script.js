@@ -2,10 +2,12 @@
  * Gets data from the SHL API, interprets it and updates the website DOM-tree 
  */
 
-
 /* global token, Notification */
+/*
+ * var token is defined in index.php, Notification is used by various
+ * browsers to send notifications.
+ */
 
-// var token is defined in index.php, Notification is used by various browsers to send notifications.
 Array.prototype.contains = function (obj) {
     var i = this.length;
     while (i--) {
@@ -224,7 +226,6 @@ function getRowFromArray(team, rank, trend) {
     var gdCell = document.createElement("TD");
     var points = document.createElement("TD");
     var trending = document.createElement("TD");
-    var image = document.createElement("IMG");
     var gdAbbr = document.createElement("ABBR");
     
     rankCell.textContent = rank;
@@ -235,13 +236,16 @@ function getRowFromArray(team, rank, trend) {
     gdCell.appendChild(gdAbbr);
     points.textContent = team.p;
     trending.textContent = trend;
-    if(trend>0)
-        image.src = "uparrow.png";
+    if(trend>1)
+        trending.textContent += " ↑";
+    else if(trend>0)
+        trending.textContent += " ↗";
+    else if(trend<-1)
+        trending.textContent += " ↓";
     else if(trend<0)
-        image.src = "downarrow.png";
+        trending.textContent += " ↘";
     else
-        image.src = "neutral.png";
-    trending.appendChild(image);
+        trending.textContent += " →";
     row.appendChild(rankCell);
     row.appendChild(name);
     row.appendChild(gpCell);
@@ -320,14 +324,18 @@ function getGame(year, gameID) {
     xmlhttp.onreadystatechange = function () {
         if (xmlhttp.readyState === 4) {
             var game = JSON.parse(xmlhttp.responseText);
-            updateLiveGame(game);
-            if (game["played"] === false) {
-                var now = Date.now();
-                var gameStart = new Date(game["start_date_time"]).getTime();
-                var delay = gameStart > now ? gameStart - now : 15000;
-                setTimeout(function () {
-                    getGame(year, gameID);
-                }, delay);
+            if(game === null){
+                getGame(2015,gameID);
+            } else {
+                updateLiveGame(game);
+                if (game["played"] === false) {
+                    var now = Date.now();
+                    var gameStart = new Date(game["start_date_time"]).getTime();
+                    var delay = gameStart > now ? gameStart - now : 15000;
+                    setTimeout(function () {
+                        getGame(year, gameID);
+                    }, delay);
+                }
             }
         }
     };
@@ -394,7 +402,7 @@ function getTeamByID(teamID) {
             return teams[i];
 }
 function notifyGoal(team,result) {
-  if (!Notification) {
+  if (!("Notification" in window)) {
     return;
   }
 
@@ -402,12 +410,63 @@ function notifyGoal(team,result) {
     Notification.requestPermission();
   else {
     var notification = new Notification(team+' scored!', {
-      icon: 'http://cdn2.shl.se/files/SHL/PressMedia/SHL_Logotype_black_144dpi.jpg',
-      body: "Current result is "+result+"!",
+      icon: getLogoByTeam(team),
+      body: "Current result is "+result+"!"
     });
 
     notification.onclick = function () {
-      window.focus();      
+      window.focus();
+      
     };
   }
+}
+function getLogoByTeam(team){
+    var logo = 'http://cdn2.shl.se/files/SHL/PressMedia/SHL_Logotype_black_144dpi.jpg';
+    switch(team){
+        case "BIF":
+            logo = 'http://cdn.shl.se/files/SHL/PressMedia/BIF_regular.jpg';
+            break;
+        case "DIF":
+            logo = 'http://hastatic.sportsedit.se/files/DIF/laddaner/difhockey.jpg';
+            break;
+        case "FHC":
+            logo = 'http://cdn2.shl.se/files/SHL/PressMedia/FHC.jpg';
+            break;
+        case "FBK":
+            logo = 'http://cdn1.shl.se/files/SHL/PressMedia/FBK.jpg';
+            break;
+        case "HV71":
+            logo = 'http://cdn2.shl.se/files/SHL/PressMedia/HV71.jpg';
+            break;
+        case "KHK":
+            logo = 'http://cdn.shl.se/files/SHL/PressMedia/KHK.jpg';
+            break;
+        case "LHC":
+            logo = 'http://cdn.shl.se/files/SHL/PressMedia/LHC.jpg';
+            break;
+        case "LHF":
+            logo = 'http://cdn.shl.se/files/SHL/PressMedia/LHF_Svart.jpg';
+            break;
+        case "MIF":
+            logo = 'http://cdn.shl.se/files/SHL/PressMedia/MIF.jpg';
+            break;
+        case "MODO":
+            logo = 'http://cdn.shl.se/files/SHL/PressMedia/MODO.jpg';
+            break;
+        case "RBK":
+            logo = 'http://cdn.shl.se/files/SHL/PressMedia/RBK.jpg';
+            break;
+        case "SAIK":
+            logo = 'http://cdn1.shl.se/files/SHL/PressMedia/SAIK.jpg';
+            break;
+        case "VLH":
+            logo = 'http://cdn2.shl.se/files/SHL/PressMedia/VLH.jpg';
+            break;
+        case "OHK":
+            logo = 'http://cdn.shl.se/files/SHL/PressMedia/OHK.jpg';
+            break;
+        default:
+            logo = 'http://cdn2.shl.se/files/SHL/PressMedia/SHL_Logotype_black_144dpi.jpg';
+    }
+    return logo;
 }
