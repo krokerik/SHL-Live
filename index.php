@@ -8,8 +8,7 @@ $t = $l->getToken();
 <html lang="sv" dir="ltr">
 <head>
     <meta charset="UTF-8" />
-    <link href="mobile.css" rel="stylesheet" media="screen">
-    <link href="style.css" rel="stylesheet" media="only screen and (min-width: 768px) ">
+    <link href="style.css" rel="stylesheet" media="screen">
     <link href="print.css" rel="stylesheet" media="print">
     <script>
             var token = "<?=$t?>";
@@ -28,7 +27,7 @@ $t = $l->getToken();
                     <th><abbr title="Games Played">GP</abbr></th>
                     <th><abbr title="Goal Difference">GD</abbr></th>
                     <th>Points</th>
-                    <th>Trending</th>
+                    <th>Trend</th>
                 </tr>
             </thead>
             <tbody id="liveTable">
