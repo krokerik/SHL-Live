@@ -34,6 +34,7 @@ var games = Array();
 var teamObjects = Array();
 var gamesArray = Array();
 var played = Array();
+var playoff = Array();
 var live = Array();
 getGames(2015);
 window.onload = function () {
@@ -76,6 +77,8 @@ function updateGames(gamesArray) {
             getGame(2015, gamesArray[i]["game_id"]);
             live.push(gamesArray[i]);
         }
+        if (date.getTime() < today.getTime() && gamesArray[i]["game_type"]==="playoff")
+            playoff.push(gamesArray[i]);
     }
 
 }
@@ -88,44 +91,46 @@ function generateTable() {
         var gf = Array();
         var p = Array();
         for (var i = 0; i < played.length; i++) {
-            var home = played[i]["home_team_code"];
-            var away = played[i]["away_team_code"];
-            if (!teams.contains(home)) {
-                teams.push(home);
-                gp[home] = 0;
-                ga[home] = 0;
-                gf[home] = 0;
-                p[home] = 0;
-            }
-            if (!teams.contains(away)) {
-                teams.push(away);
-                gp[away] = 0;
-                ga[away] = 0;
-                gf[away] = 0;
-                p[away] = 0;
-            }
-
-            gp[away]++;
-            gp[home]++;
-
-            gf[away] += played[i]["away_team_result"];
-            ga[away] += played[i]["home_team_result"];
-            gf[home] += played[i]["home_team_result"];
-            ga[home] += played[i]["away_team_result"];
-
-            if (played[i]["overtime"] || played[i]["penalty_shots"]) {
-                if (played[i]["away_team_result"] > played[i]["home_team_result"]) {
-                    p[home] += 1;
-                    p[away] += 2;
-                } else {
-                    p[home] += 2;
-                    p[away] += 1;
+            if(played[i]["game_type"]!=="playoff"){
+                var home = played[i]["home_team_code"];
+                var away = played[i]["away_team_code"];
+                if (!teams.contains(home)) {
+                    teams.push(home);
+                    gp[home] = 0;
+                    ga[home] = 0;
+                    gf[home] = 0;
+                    p[home] = 0;
                 }
-            } else {
-                if (played[i]["away_team_result"] > played[i]["home_team_result"]) {
-                    p[away] += 3;
+                if (!teams.contains(away)) {
+                    teams.push(away);
+                    gp[away] = 0;
+                    ga[away] = 0;
+                    gf[away] = 0;
+                    p[away] = 0;
+                }
+
+                gp[away]++;
+                gp[home]++;
+
+                gf[away] += played[i]["away_team_result"];
+                ga[away] += played[i]["home_team_result"];
+                gf[home] += played[i]["home_team_result"];
+                ga[home] += played[i]["away_team_result"];
+
+                if (played[i]["overtime"] || played[i]["penalty_shots"]) {
+                    if (played[i]["away_team_result"] > played[i]["home_team_result"]) {
+                        p[home] += 1;
+                        p[away] += 2;
+                    } else {
+                        p[home] += 2;
+                        p[away] += 1;
+                    }
                 } else {
-                    p[home] += 3;
+                    if (played[i]["away_team_result"] > played[i]["home_team_result"]) {
+                        p[away] += 3;
+                    } else {
+                        p[home] += 3;
+                    }
                 }
             }
         }
@@ -140,7 +145,7 @@ function generateTable() {
         }
         for (var i = 0; i < live.length; i++) {
             var date = new Date(live[i]["start_date_time"]);
-            if (live[i]["live"] !== undefined) {
+            if (live[i]["live"] !== undefined && live[i]["game_type"]!=="playoff") {
                 var home = live[i]["home_team_code"];
                 var away = live[i]["away_team_code"];
                 if (!teams.contains(home)) {
@@ -200,7 +205,179 @@ function generateTable() {
             var row = getRowFromArray(sorted[i], i + 1, rank[sorted[i].name] - (i + 1));
             liveTable.appendChild(row);
         }
+        if(playoff.length>0){
+            generatePlayoff(sorted);
+        }
     }
+}
+function playOffVs(team1, team2){
+    var team1Res = 0;
+    var team2Res = 0;
+for(var i=0; i<playoff.length; i++){
+        if((team1 === playoff[i]["home_team_code"] || team1 === playoff[i]["away_team_code"]) && 
+            (team2 === playoff[i]["home_team_code"] || team2 === playoff[i]["away_team_code"])) {
+            if(playoff[i]["away_team_result"]>playoff[i]["home_team_result"]) {
+                if(team1 === playoff[i]["away_team_code"])
+                    team1Res++;
+                else
+                    team2Res++;
+            } else {
+                if(team1 === playoff[i]["home_team_code"])
+                    team1Res++;
+                else
+                    team2Res++;
+            }
+        }
+    }
+        for(var i=0; i<live.length; i++){
+        if(live[i]["live"] !== undefined){
+            if((team1 === live[i]["home_team_code"] || team1 === live[i]["away_team_code"]) && 
+                (team2 === live[i]["home_team_code"] || team2 === live[i]["away_team_code"])) {
+                if(live[i]["live"]["away_score"]>live[i]["live"]["home_score"]) {
+                    if(team1 === live[i]["away_team_code"])
+                        team1Res++;
+                    else
+                        team2Res++;
+                } else if(live[i]["live"]["away_score"]<live[i]["live"]["home_score"]){
+                    if(team1 === live[i]["home_team_code"])
+                        team1Res++;
+                    else
+                        team2Res++;
+                }
+            }
+        }
+    }
+    var winning;
+    if(team1Res>team2Res)
+        winning = team1;
+    else if(team2Res>team1Res)
+        winning = team2;
+    else
+        winning = "TBD";
+    return {team1:team1,
+            team2:team2,
+            team1Res:team1Res, 
+            team2Res:team2Res, 
+            winning:winning};
+}
+function getPos(teamArray, team){
+    var pos = 0;
+    for(var i=0; i<teamArray.length; i++) {
+        if(team === teamArray[i]["name"]) {
+            pos = i+1;
+            break;
+        }
+    }
+    return pos;
+}
+function generatePlayoff(teamArray) {
+    var playOffDiv = document.getElementById("playOff");
+    var playIn = new Array(
+            playOffVs(teamArray[6]["name"],teamArray[9]["name"]),
+            playOffVs(teamArray[7]["name"],teamArray[8]["name"]));
+    
+    var oldDiv = document.getElementById("Eighth");
+    var newDiv = generateRoundDiv("Eighth",playIn);
+    if (oldDiv === null)
+        playOffDiv.appendChild(newDiv);
+    else
+        playOffDiv.replaceChild(newDiv, oldDiv);
+    
+    var playInWinners = sortRoundWinners(teamArray,playIn);
+    var quarters = new Array(
+                playOffVs(teamArray[0]["name"],playInWinners[1].team),
+                playOffVs(teamArray[1]["name"],playInWinners[0].team),
+                playOffVs(teamArray[2]["name"],teamArray[5]["name"]),
+                playOffVs(teamArray[3]["name"],teamArray[4]["name"]));
+                
+    oldDiv = document.getElementById("Quarter");
+    newDiv = generateRoundDiv("Quarter",quarters);
+    if (oldDiv === null)
+        playOffDiv.appendChild(newDiv);
+    else
+        playOffDiv.replaceChild(newDiv, oldDiv);
+                
+    var quarterWinners = sortRoundWinners(teamArray,quarters);
+    var semiFinals = new Array(
+                    playOffVs(quarterWinners[0].team,quarterWinners[3].team),
+                    playOffVs(quarterWinners[1].team,quarterWinners[2].team));
+                    
+    oldDiv = document.getElementById("Semi");
+    newDiv = generateRoundDiv("Semi",semiFinals);
+    if (oldDiv === null)
+        playOffDiv.appendChild(newDiv);
+    else
+        playOffDiv.replaceChild(newDiv, oldDiv);
+
+    var semiFinalWinners = sortRoundWinners(teamArray,semiFinals);
+    var final = new Array(playOffVs(semiFinalWinners[0].team,semiFinalWinners[1].team));
+    
+    oldDiv = document.getElementById("Final");
+    newDiv = generateRoundDiv("Final",final);
+    if (oldDiv === null)
+        playOffDiv.appendChild(newDiv);
+    else
+        playOffDiv.replaceChild(newDiv, oldDiv);
+}
+function generateRoundDiv(roundName,matchups) {
+    var roundDiv = document.createElement("DIV");
+    var title = document.createElement("H4");
+    
+    title.textContent = roundName;
+    
+    roundDiv.id = roundName;
+    roundDiv.className = "playOffRound";
+    roundDiv.appendChild(title);
+    
+    for(var i = 0; i<matchups.length; i++) {
+        var matchup = document.createElement("DIV");
+        var team1 = document.createElement("SPAN");
+        var team2 = document.createElement("SPAN");
+        var team1Res = document.createElement("SPAN");
+        var team2Res = document.createElement("SPAN");
+        
+        matchup.className = "game";
+        team1.className = "home";
+        team2.className = "away";
+        team1Res.className = "result";
+        team2Res.className = "result";
+        if(matchups[i].team1Res > matchups[i].team2Res)
+            team1.className = "winning";
+        else if(matchups[i].team1Res < matchups[i].team2Res)
+            team2.className = "winning";
+        
+        team1Res.textContent = matchups[i].team1Res;
+        team2Res.textContent = matchups[i].team2Res;
+        team1.textContent = matchups[i].team1;
+        team2.textContent = matchups[i].team2;
+        
+        team1.appendChild(team1Res);
+        team2.appendChild(team2Res);
+        matchup.appendChild(team1);
+        matchup.appendChild(team2);
+        roundDiv.appendChild(matchup);
+    }
+    return roundDiv;
+}
+function sortRoundWinners(teamArray, matchups){
+    var winners = new Array();
+    for(var i=0; i<matchups.length; i++){
+        winners.push({team:matchups[i].winning,
+                      rank:getPos(teamArray,matchups[i].winning)});
+    }
+    var swapped, temp;
+    do {
+        swapped = false;
+        for (var i = 0; i < winners.length - 1; i++) {
+            if (winners[i].rank > winners[i + 1].rank) {
+                temp = winners[i];
+                winners[i] = winners[i + 1];
+                winners[i + 1] = temp;
+                swapped = true;
+            }
+        }
+    } while (swapped);
+    return winners;
 }
 function sortTable(teamArray) {
     var sorted = teamArray.slice();
@@ -208,7 +385,7 @@ function sortTable(teamArray) {
     do {
         swapped = false;
         for (var i = 0; i < sorted.length - 1; i++) {
-            if (sorted[i].p < sorted[i + 1].p || (sorted[i].p === sorted[i + 1].p && sorted[i].gd < sorted[i + 1].gd) || (sorted[i].p === sorted[i + 1].p && sorted[i].gd === sorted[i + 1].gd && sorted[i].gf < sorted[i + 1].gf)) {
+            if (sorted[i].p < sorted[i + 1].p || (sorted[i].p === sorted[i + 1].p && sorted[i].gd() < sorted[i + 1].gd()) || (sorted[i].p === sorted[i + 1].p && sorted[i].gd() === sorted[i + 1].gd() && sorted[i].gf < sorted[i + 1].gf)) {
                 temp = sorted[i];
                 sorted[i] = sorted[i + 1];
                 sorted[i + 1] = temp;
@@ -308,6 +485,7 @@ function getGameFromJson(game) {
 }
 function getGames(year) {
     var url = baseUrl + "?token=" + token + "&action=games&year=" + year;
+    console.log(url);
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function () {
         if (xmlhttp.readyState === 4) {
@@ -388,7 +566,8 @@ function updateLiveGame(game) {
             var oldAway = live[i]["live"]!==undefined ? live[i]["live"]["away_score"] : live[i]["away_team_result"];
             var currHome = game["live"]!==undefined ? game["live"]["home_score"] : game["home_team_result"];
             var currAway = game["live"]!==undefined ? game["live"]["away_score"] : game["away_team_result"];
-            var scoreLine = game["home_team_code"]+" "+currHome+" - "+currAway+" "+game["away_team_code"];
+            var time = game["live"]!==undefined ? game["live"]["status_string"] : game["Over"];
+            var scoreLine = game["home_team_code"]+" "+currHome+" - "+currAway+" "+game["away_team_code"]+" at "+time;
             if(oldHome!==currHome)
                 notifyGoal(game["home_team_code"],scoreLine);
             if(oldAway!==currAway)
@@ -402,6 +581,7 @@ function getTeamByID(teamID) {
             return teams[i];
 }
 function notifyGoal(team,result) {
+  setFavicon("goal.ico");
   if (!("Notification" in window)) {
     return;
   }
@@ -410,63 +590,16 @@ function notifyGoal(team,result) {
     Notification.requestPermission();
   else {
     var notification = new Notification(team+' scored!', {
-      icon: getLogoByTeam(team),
+      icon: "goal.ico",
       body: "Current result is "+result+"!"
     });
 
     notification.onclick = function () {
       window.focus();
-      
+      setFavicon("nogoal.ico");
     };
   }
 }
-function getLogoByTeam(team){
-    var logo = 'http://cdn2.shl.se/files/SHL/PressMedia/SHL_Logotype_black_144dpi.jpg';
-    switch(team){
-        case "BIF":
-            logo = 'http://cdn.shl.se/files/SHL/PressMedia/BIF_regular.jpg';
-            break;
-        case "DIF":
-            logo = 'http://hastatic.sportsedit.se/files/DIF/laddaner/difhockey.jpg';
-            break;
-        case "FHC":
-            logo = 'http://cdn2.shl.se/files/SHL/PressMedia/FHC.jpg';
-            break;
-        case "FBK":
-            logo = 'http://cdn1.shl.se/files/SHL/PressMedia/FBK.jpg';
-            break;
-        case "HV71":
-            logo = 'http://cdn2.shl.se/files/SHL/PressMedia/HV71.jpg';
-            break;
-        case "KHK":
-            logo = 'http://cdn.shl.se/files/SHL/PressMedia/KHK.jpg';
-            break;
-        case "LHC":
-            logo = 'http://cdn.shl.se/files/SHL/PressMedia/LHC.jpg';
-            break;
-        case "LHF":
-            logo = 'http://cdn.shl.se/files/SHL/PressMedia/LHF_Svart.jpg';
-            break;
-        case "MIF":
-            logo = 'http://cdn.shl.se/files/SHL/PressMedia/MIF.jpg';
-            break;
-        case "MODO":
-            logo = 'http://cdn.shl.se/files/SHL/PressMedia/MODO.jpg';
-            break;
-        case "RBK":
-            logo = 'http://cdn.shl.se/files/SHL/PressMedia/RBK.jpg';
-            break;
-        case "SAIK":
-            logo = 'http://cdn1.shl.se/files/SHL/PressMedia/SAIK.jpg';
-            break;
-        case "VLH":
-            logo = 'http://cdn2.shl.se/files/SHL/PressMedia/VLH.jpg';
-            break;
-        case "OHK":
-            logo = 'http://cdn.shl.se/files/SHL/PressMedia/OHK.jpg';
-            break;
-        default:
-            logo = 'http://cdn2.shl.se/files/SHL/PressMedia/SHL_Logotype_black_144dpi.jpg';
-    }
-    return logo;
+function setFavicon(icon){
+    document.getElementById("favicon").href = icon;
 }
