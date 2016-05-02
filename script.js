@@ -17,7 +17,7 @@ Array.prototype.contains = function (obj) {
     }
     return false;
 };
-function team(code, gp, gf, ga, p) {
+function Team(code, gp, gf, ga, p) {
     this.name = code;
     this.gp = gp;
     this.gf = gf;
@@ -29,21 +29,21 @@ function team(code, gp, gf, ga, p) {
 }
 
 var baseUrl = window.location.protocol + "//" + window.location.host + "/SHL/SHL_Proxy.php";
-var teams = Array();
-var games = Array();
-var teamObjects = Array();
-var gamesArray = Array();
-var played = Array();
-var playoff = Array();
-var live = Array();
+var teams = [];
+var games = [];
+var teamObjects = [];
+var gamesArray = [];
+var played = [];
+var playoff = [];
+var live = [];
 getGames(2015);
 window.onload = function () {
     setInterval(updateGamesDiv, 3000);
     setInterval(generateTable, 3000);
 };
 document.addEventListener('DOMContentLoaded', function () {
-  if (Notification.permission !== "granted")
-    Notification.requestPermission();
+    if (Notification.permission !== "granted")
+        Notification.requestPermission();
 });
 
 function updateGamesDiv() {
@@ -85,15 +85,16 @@ function updateGames(gamesArray) {
 function generateTable() {
     if (played.length > 0) {
         var liveTable = document.getElementById("liveTable");
-        var teams = Array();
-        var gp = Array();
-        var ga = Array();
-        var gf = Array();
-        var p = Array();
-        for (var i = 0; i < played.length; i++) {
+        var teams = [];
+        var gp = [];
+        var ga = [];
+        var gf = [];
+        var p = [];
+        var home, away, i;
+        for (i = 0; i < played.length; i++) {
             if(played[i]["game_type"]!=="playoff"){
-                var home = played[i]["home_team_code"];
-                var away = played[i]["away_team_code"];
+                home = played[i]["home_team_code"];
+                away = played[i]["away_team_code"];
                 if (!teams.contains(home)) {
                     teams.push(home);
                     gp[home] = 0;
@@ -134,20 +135,19 @@ function generateTable() {
                 }
             }
         }
-        teamObjects = Array();
-        for (var i = 0; i < teams.length; i++) {
-            teamObjects.push(new team(teams[i], gp[teams[i]], gf[teams[i]], ga[teams[i]], p[teams[i]]));
+        teamObjects = [];
+        for (i = 0; i < teams.length; i++) {
+            teamObjects.push(new Team(teams[i], gp[teams[i]], gf[teams[i]], ga[teams[i]], p[teams[i]]));
         }
-        var rank = Array();
+        var rank = [];
         var sorted = sortTable(teamObjects);
-        for (var i = 0; i < sorted.length; i++) {
+        for (i = 0; i < sorted.length; i++) {
             rank[sorted[i].name] = i + 1;
         }
-        for (var i = 0; i < live.length; i++) {
-            var date = new Date(live[i]["start_date_time"]);
+        for (i = 0; i < live.length; i++) {
             if (live[i]["live"] !== undefined && live[i]["game_type"]!=="playoff") {
-                var home = live[i]["home_team_code"];
-                var away = live[i]["away_team_code"];
+                home = live[i]["home_team_code"];
+                away = live[i]["away_team_code"];
                 if (!teams.contains(home)) {
                     teams.push(home);
                     gp[home] = 0;
@@ -193,15 +193,15 @@ function generateTable() {
                 }
             }
         }
-        teamObjects = Array();
-        for (var i = 0; i < teams.length; i++) {
-            teamObjects.push(new team(teams[i], gp[teams[i]], gf[teams[i]], ga[teams[i]], p[teams[i]]));
+        teamObjects = [];
+        for (i = 0; i < teams.length; i++) {
+            teamObjects.push(new Team(teams[i], gp[teams[i]], gf[teams[i]], ga[teams[i]], p[teams[i]]));
         }
         console.log(teamObjects);
         sorted = sortTable(teamObjects);
         while (liveTable.hasChildNodes())
             liveTable.removeChild(liveTable.firstChild);
-        for (var i = 0; i < sorted.length; i++) {
+        for (i = 0; i < sorted.length; i++) {
             var row = getRowFromArray(sorted[i], i + 1, rank[sorted[i].name] - (i + 1));
             liveTable.appendChild(row);
         }
@@ -213,8 +213,9 @@ function generateTable() {
 function playOffVs(team1, team2){
     var team1Res = 0;
     var team2Res = 0;
-for(var i=0; i<playoff.length; i++){
-        if((team1 === playoff[i]["home_team_code"] || team1 === playoff[i]["away_team_code"]) && 
+    var i;
+    for(i=0; i<playoff.length; i++){
+        if((team1 === playoff[i]["home_team_code"] || team1 === playoff[i]["away_team_code"]) &&
             (team2 === playoff[i]["home_team_code"] || team2 === playoff[i]["away_team_code"])) {
             if(playoff[i]["away_team_result"]>playoff[i]["home_team_result"]) {
                 if(team1 === playoff[i]["away_team_code"])
@@ -229,9 +230,9 @@ for(var i=0; i<playoff.length; i++){
             }
         }
     }
-        for(var i=0; i<live.length; i++){
+    for(i=0; i<live.length; i++){
         if(live[i]["live"] !== undefined){
-            if((team1 === live[i]["home_team_code"] || team1 === live[i]["away_team_code"]) && 
+            if((team1 === live[i]["home_team_code"] || team1 === live[i]["away_team_code"]) &&
                 (team2 === live[i]["home_team_code"] || team2 === live[i]["away_team_code"])) {
                 if(live[i]["live"]["away_score"]>live[i]["live"]["home_score"]) {
                     if(team1 === live[i]["away_team_code"])
@@ -255,10 +256,10 @@ for(var i=0; i<playoff.length; i++){
     else
         winning = "TBD";
     return {team1:team1,
-            team2:team2,
-            team1Res:team1Res, 
-            team2Res:team2Res, 
-            winning:winning};
+        team2:team2,
+        team1Res:team1Res,
+        team2Res:team2Res,
+        winning:winning};
 }
 function getPos(teamArray, team){
     var pos = 0;
@@ -272,36 +273,33 @@ function getPos(teamArray, team){
 }
 function generatePlayoff(teamArray) {
     var playOffDiv = document.getElementById("playOff");
-    var playIn = new Array(
-            playOffVs(teamArray[6]["name"],teamArray[9]["name"]),
-            playOffVs(teamArray[7]["name"],teamArray[8]["name"]));
-    
+    var playIn = [playOffVs(teamArray[6]["name"],teamArray[9]["name"]),
+        playOffVs(teamArray[7]["name"],teamArray[8]["name"])];
+
     var oldDiv = document.getElementById("Eighth");
     var newDiv = generateRoundDiv("Eighth",playIn);
     if (oldDiv === null)
         playOffDiv.appendChild(newDiv);
     else
         playOffDiv.replaceChild(newDiv, oldDiv);
-    
+
     var playInWinners = sortRoundWinners(teamArray,playIn);
-    var quarters = new Array(
-                playOffVs(teamArray[0]["name"],playInWinners[1].team),
-                playOffVs(teamArray[1]["name"],playInWinners[0].team),
-                playOffVs(teamArray[2]["name"],teamArray[5]["name"]),
-                playOffVs(teamArray[3]["name"],teamArray[4]["name"]));
-                
+    var quarters = [playOffVs(teamArray[0]["name"],playInWinners[1].team),
+        playOffVs(teamArray[1]["name"],playInWinners[0].team),
+        playOffVs(teamArray[2]["name"],teamArray[5]["name"]),
+        playOffVs(teamArray[3]["name"],teamArray[4]["name"])];
+
     oldDiv = document.getElementById("Quarter");
     newDiv = generateRoundDiv("Quarter",quarters);
     if (oldDiv === null)
         playOffDiv.appendChild(newDiv);
     else
         playOffDiv.replaceChild(newDiv, oldDiv);
-                
+
     var quarterWinners = sortRoundWinners(teamArray,quarters);
-    var semiFinals = new Array(
-                    playOffVs(quarterWinners[0].team,quarterWinners[3].team),
-                    playOffVs(quarterWinners[1].team,quarterWinners[2].team));
-                    
+    var semiFinals = [playOffVs(quarterWinners[0].team,quarterWinners[3].team),
+        playOffVs(quarterWinners[1].team,quarterWinners[2].team)];
+
     oldDiv = document.getElementById("Semi");
     newDiv = generateRoundDiv("Semi",semiFinals);
     if (oldDiv === null)
@@ -311,7 +309,7 @@ function generatePlayoff(teamArray) {
 
     var semiFinalWinners = sortRoundWinners(teamArray,semiFinals);
     var final = new Array(playOffVs(semiFinalWinners[0].team,semiFinalWinners[1].team));
-    
+
     oldDiv = document.getElementById("Final");
     newDiv = generateRoundDiv("Final",final);
     if (oldDiv === null)
@@ -322,20 +320,20 @@ function generatePlayoff(teamArray) {
 function generateRoundDiv(roundName,matchups) {
     var roundDiv = document.createElement("DIV");
     var title = document.createElement("H4");
-    
+
     title.textContent = roundName;
-    
+
     roundDiv.id = roundName;
     roundDiv.className = "playOffRound";
     roundDiv.appendChild(title);
-    
+
     for(var i = 0; i<matchups.length; i++) {
         var matchup = document.createElement("DIV");
         var team1 = document.createElement("SPAN");
         var team2 = document.createElement("SPAN");
         var team1Res = document.createElement("SPAN");
         var team2Res = document.createElement("SPAN");
-        
+
         matchup.className = "game";
         team1.className = "home";
         team2.className = "away";
@@ -345,12 +343,12 @@ function generateRoundDiv(roundName,matchups) {
             team1.className = "winning";
         else if(matchups[i].team1Res < matchups[i].team2Res)
             team2.className = "winning";
-        
+
         team1Res.textContent = matchups[i].team1Res;
         team2Res.textContent = matchups[i].team2Res;
         team1.textContent = matchups[i].team1;
         team2.textContent = matchups[i].team2;
-        
+
         team1.appendChild(team1Res);
         team2.appendChild(team2Res);
         matchup.appendChild(team1);
@@ -360,15 +358,16 @@ function generateRoundDiv(roundName,matchups) {
     return roundDiv;
 }
 function sortRoundWinners(teamArray, matchups){
-    var winners = new Array();
-    for(var i=0; i<matchups.length; i++){
+    var winners = [];
+    var i;
+    for(i=0; i<matchups.length; i++){
         winners.push({team:matchups[i].winning,
-                      rank:getPos(teamArray,matchups[i].winning)});
+            rank:getPos(teamArray,matchups[i].winning)});
     }
     var swapped, temp;
     do {
         swapped = false;
-        for (var i = 0; i < winners.length - 1; i++) {
+        for (i = 0; i < winners.length - 1; i++) {
             if (winners[i].rank > winners[i + 1].rank) {
                 temp = winners[i];
                 winners[i] = winners[i + 1];
@@ -404,7 +403,7 @@ function getRowFromArray(team, rank, trend) {
     var points = document.createElement("TD");
     var trending = document.createElement("TD");
     var gdAbbr = document.createElement("ABBR");
-    
+
     rankCell.textContent = rank;
     name.textContent = team.name;
     gpCell.textContent = team.gp;
@@ -535,7 +534,7 @@ function getTeams() {
     xmlhttp.onreadystatechange = function () {
         if (xmlhttp.readyState === 4) {
             var tmp = JSON.parse(xmlhttp.responseText);
-            teams = Array();
+            teams = [];
             for (var i = 0; i < tmp.length; i++) {
                 teams.push();
             }
@@ -546,18 +545,18 @@ function getTeams() {
 }
 function getTeam(teamID) {
     var url = baseUrl + "?token=" + token + "&action=team&team=" + teamID;
-    var xmlhttp = new XMLHttpRequest();
-    xmlhttp.onreadystatechange = function () {
-        if (xmlhttp.readyState === 4) {
-            var tmp = JSON.parse(xmlhttp.responseText);
-            teams = Array();
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.onreadystatechange = function () {
+        if (xmlHttp.readyState === 4) {
+            var tmp = JSON.parse(xmlHttp.responseText);
+            teams = [];
             for (var i = 0; i < tmp.length; i++) {
                 teams.push(tmp[i]);
             }
         }
     };
-    xmlhttp.open("GET", url, true);
-    xmlhttp.send();
+    xmlHttp.open("GET", url, true);
+    xmlHttp.send();
 }
 function updateLiveGame(game) {
     for (var i = 0; i < live.length; i++)
@@ -581,24 +580,24 @@ function getTeamByID(teamID) {
             return teams[i];
 }
 function notifyGoal(team,result) {
-  setFavicon("goal.ico");
-  if (!("Notification" in window)) {
-    return;
-  }
+    setFavicon("goal.ico");
+    if (!("Notification" in window)) {
+        return;
+    }
 
-  if (Notification.permission !== "granted")
-    Notification.requestPermission();
-  else {
-    var notification = new Notification(team+' scored!', {
-      icon: "goal.ico",
-      body: "Current result is "+result+"!"
-    });
+    if (Notification.permission !== "granted")
+        Notification.requestPermission();
+    else {
+        var notification = new Notification(team+' scored!', {
+            icon: "goal.ico",
+            body: "Current result is "+result+"!"
+        });
 
-    notification.onclick = function () {
-      window.focus();
-      setFavicon("nogoal.ico");
-    };
-  }
+        notification.onclick = function () {
+            window.focus();
+            setFavicon("nogoal.ico");
+        };
+    }
 }
 function setFavicon(icon){
     document.getElementById("favicon").href = icon;
