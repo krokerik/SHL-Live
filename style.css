@@ -1,17 +1,27 @@
-/*
-To change this license header, choose License Headers in Project Properties.
-To change this template file, choose Tools | Templates
-and open the template in the editor.
-*/
 /* 
     Created on : Jan 13, 2016, 12:39:53 PM
     Author     : Erik Andersson
+    Colours    : #BBE5ED,
+                 #BFBCCD,
+                 #B399A2,
+                 #5B6B68,
+                 #5F6D56
 */
+* {
+    color: #B399A2;
+    cursor: default;
+}
 h1, h2, h3, h4, h5, h6 {
   width:100%;
   margin-top: 0;
   margin-bottom: 1rem;
   font-weight: 300;
+  color: #5D7A59;
+  }
+  #games h4,
+  #games h5,
+  #games h6 {
+   color: #B399A2;
   }
 h1 { font-size: 4.0rem; line-height: 1.2;  letter-spacing: -.1rem;}
 h2 { font-size: 3.6rem; line-height: 1.25; letter-spacing: -.1rem; }
@@ -22,12 +32,18 @@ h6 { font-size: 1.5rem; line-height: 1.6;  letter-spacing: 0; }
 table {
     font-size: 4em;
 }
+th,th *{
+    color: #5D7A59;
+}
+td, td *{
+    color: #BBE5ED;
+}
 h1 {
     text-align: center;
 }
 body{
     margin:0px;
-    background-color: white;
+    background-color: #BBE5ED;
 }
 #games{
     float: left;
@@ -38,16 +54,22 @@ body{
   overflow: auto;
 }
 .game{
+    background-color: #bfbccd;
     float: left;
     width:auto;
     padding:0.1em;
     margin:0.5em;
-    border: 2px black solid;
     border-radius: 0.6em;
 }
 .winning{
-    color:gold;
+    color:#5B6B68;
     font-weight:bold;
+}
+#Final .winning {
+    text-shadow: 0px 0px 10px;
+}
+#Final .winning .result {
+    text-shadow: 0px 0px 0px;
 }
 .home,.away,.winning{
     display:block;
@@ -70,35 +92,36 @@ table{
     border-collapse: collapse;
     width:100%;
 }
-td,th{
-    border: 2px solid black;
+thead>tr {
+  background-color: #BFBCCD;
 }
 tbody>tr:nth-child(n+1):nth-child(-n+6) {
-    background-color: green;
+    background-color: #4D8C60;
 }
 tbody>tr:nth-child(n+7):nth-child(-n+10) {
-    background-color: yellow;
+    background-color: #B2B23E;
 }
 tbody>tr:nth-child(n+11):nth-child(-n+12) {
-    background-color: grey;
+    background-color: #8C8C8C;
     color: white;
 }
 tbody>tr:nth-child(n+13):nth-child(-n+14) {
-    background-color: red;
+    background-color: #FF5959;
     color: white;
 }
 footer > a:hover {
     text-decoration: underline;
 }
 footer > a {
-    color: black;
+    color: #5B6B68;
     text-decoration: none;
+    cursor: pointer;
 }
 footer {
     letter-spacing: -0.05rem;
     text-align: center;
     margin: 20px;
-    color: gray;
+    color: #B399A2;
 }
 /* Desktop CSS */
 @media (min-width: 1000px) {
@@ -123,6 +146,7 @@ footer {
     }
 
     table{
+      color: #5B6B68;
         width:100%;
         font-size: 1.3vw;
     }
@@ -133,7 +157,6 @@ footer {
         float:none;
         padding:0.1em;
         margin:0.5em;
-        border: 1px black solid;
         border-radius: 0.3em;
     }
     .playOffRound{
@@ -161,10 +184,6 @@ footer {
 
     .result {
         float: right;
-    }
-
-    td,th{
-        border: 1px solid black;
     }
     h1 { font-size: 3.0vw; }
     h2 { font-size: 2.2vw; }
