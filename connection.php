@@ -5,8 +5,8 @@
  */
 class Connection {
     const BASEURL = 'https://openapi.shl.se/';
-    private $clientId = '';
-    private $clientSecret = '';
+    private $clientId = 'a2b3032d22668d39952c561d15dc8fe9';
+    private $clientSecret = '7f2d9b114de308203b2e8a206534a737ccbcd248581c6920bb4acd188a387d6a';
     private $token;
     private $retrieved;
     private $expires;

@@ -14,11 +14,18 @@ $t = $l->getToken();
     <script>
             var token = "<?=$t?>";
     </script>
-    <script src="script.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.1.0/react.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.1.0/react-dom.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.7.7/babel.min.js"></script>
+    <!-- <script src="script.js"></script> -->
+    <script type="text/babel" src="react/container.js"></script>
     <title><?=$title?></title>
 </head>
 <body>
     <h1><?=$title?></h1>
+    <div id="root"></div>
+
+    <!--
     <div id="container">
         <div id="table">
             <table>
@@ -42,5 +49,6 @@ $t = $l->getToken();
     <footer>
         Utvecklad av <a target="_blank" hreflang="en" href="http://erik-andersson.se/">Erik Andersson</a> med hjälp av data tillhandahållen av <a target="_blank" hreflang="sv" href="http://www.shl.se/">SHL.se</a>.
     </footer>
+    -->
 </body>
 </html>
