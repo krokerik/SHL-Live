@@ -14,9 +14,9 @@ $t = $l->getToken();
     <script>
             var token = "<?=$t?>";
     </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.1.0/react.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.1.0/react-dom.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.7.7/babel.min.js"></script>
+    <script src="react/build/react.js"></script>
+    <script src="react/build/react-dom.js"></script>
+    <script src="react/build/browser.min.js"></script>
     <!-- <script src="script.js"></script> -->
     <script type="text/babel" src="react/container.js"></script>
     <title><?=$title?></title>
